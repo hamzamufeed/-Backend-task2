@@ -1,5 +1,6 @@
 package com.task2;
 
+import com.task2.services.ThreadingService;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +16,11 @@ public class Task2Application {
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
+    }
+
+    @Bean
+    public ThreadingService threadingService(){
+        return new ThreadingService();
     }
 }
 

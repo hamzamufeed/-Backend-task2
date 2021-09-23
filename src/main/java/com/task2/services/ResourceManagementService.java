@@ -24,6 +24,9 @@ public class ResourceManagementService {
     @Autowired
     TransformerService transformerService;
 
+    @Autowired
+    ThreadingService threadingService;
+
     @PostConstruct
     public void initializeCacheFromDB(){
         ServerCache.getInstance().setServers(
@@ -46,18 +49,17 @@ public class ResourceManagementService {
         return (serverModel != null) ? (ServerDTO) transformerService.EntityToDto(serverModel, ServerDTO.class) : null;
     }
 
-    public ServerDTO addServer(Double size) {
+    public synchronized ServerDTO addServer(Double size) {
         ServerDTO serverDTO = new ServerDTO();
         serverDTO.setServerId(getNextId());
-        serverDTO.setTotal(size);
         Date date = new Date();
-        serverDTO.setAllocated(0.0);
-        serverDTO.setFree(size);
+        serverDTO.setAllocated(size);
+        serverDTO.setFree(serverDTO.getTotal() - size);
         serverDTO.setState("Creating");
         serverDTO.setDateCreated(date);
         ServerModel serverModel = (ServerModel) transformerService.DtoToEntity(serverDTO, ServerModel.class);
 
-        ThreadingService threadingService = new ThreadingService(serverModel,aerospikeServerRepository);
+        ThreadingService threadingService = new ThreadingService(serverModel, aerospikeServerRepository);
         threadingService.start();
 
         aerospikeServerRepository.save(serverModel);
@@ -106,7 +108,7 @@ public class ResourceManagementService {
         try {
             return StreamSupport
                     .stream(allServers.spliterator(), false)
-                    .filter(i -> i.getFree() >= size && i.getState().equals("Active"))
+                    .filter(i -> i.getFree() >= size)
                     .sorted(Comparator.comparing((ServerModel::getFree)))
                     .collect(Collectors.toList())
                     .get(0);

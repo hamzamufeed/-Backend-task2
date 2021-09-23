@@ -24,7 +24,7 @@ public class ServerDTO implements DTO {
     @Min(value = 0, message = "Capacity should not be less than 0")
     @Max(value = 100, message = "Capacity should not be greater than 100")
     @NotNull
-    private Double total = 0.0;
+    private Double total = 100.0;
 
     @NonNull
     private Double allocated = 0.0;

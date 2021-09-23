@@ -5,7 +5,10 @@ import com.task2.DB.ServerCache;
 import com.task2.DB.ServerModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ThreadingService implements Runnable{
 
     private Thread thread;
@@ -14,6 +17,10 @@ public class ThreadingService implements Runnable{
     private AerospikeServerRepository aerospikeServerRepository;
 
     public final Logger logger = LogManager.getLogger(TransformerService.class);
+
+    public ThreadingService(){
+
+    }
 
     public ThreadingService(ServerModel serverModel, AerospikeServerRepository aerospikeServerRepository){
         this.serverModel = serverModel;
