@@ -17,57 +17,55 @@ public class ResourceManagementController {
 
     @GetMapping("/server/")
     public List<ServerDTO> getAll(){
-        return resourceManagementService.getAll();
+        return resourceManagementService.getAllServers();
     }
 
     @GetMapping("/server/{id}")
     public ResponseEntity<?> get(@PathVariable int id){
-        ServerDTO serverDTO = resourceManagementService.get(id);
+        ServerDTO serverDTO = resourceManagementService.getServer(id);
         return (serverDTO == null) ?
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body("Server Not Found") :
                 ResponseEntity.status(HttpStatus.OK).body(serverDTO);
     }
 
-    @PostMapping("/server")
-    public ResponseEntity<?> CreateServer(@RequestBody ServerDTO serverDTO) {
-        if (resourceManagementService.get(serverDTO.getServerId()) != null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Server Already Exists");
-        else if (serverDTO.getServerId() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Server Not Valid");
-        else if (serverDTO.getTotal() <= 0 || serverDTO.getTotal() > 100)
+    @PostMapping("/server/total")
+    public ResponseEntity<?> CreateServer(@RequestParam() Double size) {
+        if (size <= 0 || size > 100)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Memory Size should be 0 - 100");
         else {
-            resourceManagementService.add(serverDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Server Added");
+            ServerDTO newServer = resourceManagementService.addServer(size);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newServer);
         }
     }
 
     @PutMapping("/server/{id}")
     public ResponseEntity<?> update(@RequestBody ServerDTO serverDTO, @PathVariable("id") Integer id) {
-        if (resourceManagementService.get(serverDTO.getServerId()) == null)
+        if (resourceManagementService.getServer(serverDTO.getServerId()) == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Server Not Found");
         else if (serverDTO.getServerId() == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Server Not Valid");
         else if (serverDTO.getTotal() <= 0 || serverDTO.getTotal() > 100)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Memory Size should be 0 - 100");
         else
-            return ResponseEntity.status(HttpStatus.OK).body(resourceManagementService.update(serverDTO));
+            return ResponseEntity.status(HttpStatus.OK).body(resourceManagementService.updateServer(serverDTO));
     }
 
     @DeleteMapping("/server/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Integer id) {
-        ServerDTO serverDTO = resourceManagementService.get(id);
+        ServerDTO serverDTO = resourceManagementService.getServer(id);
         if (serverDTO == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Server Not Found");
         else {
-            resourceManagementService.remove(id);
+            resourceManagementService.removeServer(id);
             return ResponseEntity.status(HttpStatus.OK).body("Server Deleted");
         }
     }
 
     @PostMapping("/server/allocate")
     public ResponseEntity<?> AllocateServer(@RequestParam() Double size) {
-        return ResponseEntity.status(HttpStatus.OK).body(resourceManagementService.allocate(size));
+        if(size <= 0 || size > 100)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Allocation should be 0 - 100");
+        return ResponseEntity.status(HttpStatus.OK).body(resourceManagementService.allocateServer(size));
     }
 
 }
